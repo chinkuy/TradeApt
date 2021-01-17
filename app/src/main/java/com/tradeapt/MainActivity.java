@@ -2,6 +2,7 @@ package com.tradeapt;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -20,27 +21,42 @@ public class MainActivity extends AppCompatActivity {
 
     final String currentDate = "202101";
     final String localNumber = "41117";
+    private final String mDbName = "apt.db";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final AptDB aptDB;
+        final SQLiteDatabase db;
+        aptDB = new AptDB(MainActivity.this, mDbName, null, 1);
+        db = aptDB.getWritableDatabase();
+        aptDB.onCreate(db);
 
         new Thread(new Runnable() {
 
             ArrayList<AptList> aptList = new ArrayList<>();
+            ArrayList<String> aptName = new ArrayList<>();
 
             public void run() {
                 aptList = GetAptData(localNumber, currentDate);
 
-                for(int i = 0 ; i < aptList.size();i++){
-                    Log.d("Hey", "AptList : " + aptList.get(i).getAptName());
+                for(int i = 0; i < aptList.size() ;i++){
+                    aptList.get(i).getAptName();
+
+                    if(!aptName.contains(aptList.get(i).getAptName())){
+                        aptName.add(aptList.get(i).getAptName());
+                        aptDB.createTable(db,aptList.get(i).getAptName());
+                    }
+                    aptDB.insertData(db, aptList.get(i).getAptName(), aptList.get(i));
                 }
+
+
 
             }
         }).start();
-
     }
 
     ArrayList<AptList> GetAptData(String localNumber, String date){
