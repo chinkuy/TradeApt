@@ -43,25 +43,6 @@ public class AptList{
     }
 
     public void setAptName(String aptName) {
-
-        if(aptName.equals("e-편한세상")){
-            aptName = "e편한세상";
-        }
-        if(aptName.equals("살구골마을(진덕,서광,성지,동아)")){
-            aptName = "살구골마을";
-        }
-        if(aptName.equals("황골마을(쌍용)")){
-            aptName = "황골마을";
-        }
-
-        if(aptName.equals("래미안 영통마크원 2단지")){
-            aptName = "래미안영통마크원2단지";
-        }
-
-        if(aptName.equals("래미안 영통마크원 1단지")){
-            aptName = "래미안영통마크원1단지";
-        }
-
         AptName = aptName;
     }
 
