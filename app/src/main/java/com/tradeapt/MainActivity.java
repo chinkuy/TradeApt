@@ -35,10 +35,19 @@ public class MainActivity extends AppCompatActivity {
         db = aptDB.getWritableDatabase();
         aptDB.onCreate(db);
 
+        ArrayList<String> aptPreNameList = aptDB.getTableList(db);
+        Log.d("Hey", "AptPreList : " + aptPreNameList);
+
+        if(aptPreNameList.size() > 0){
+
+        }else{
+
+        }
+
         new Thread(new Runnable() {
 
             ArrayList<AptList> aptList = new ArrayList<>();
-            ArrayList<String> aptName = new ArrayList<>();
+            ArrayList<String> aptNameList = new ArrayList<>();
 
             public void run() {
                 aptList = GetAptData(localNumber, currentDate);
@@ -46,15 +55,12 @@ public class MainActivity extends AppCompatActivity {
                 for(int i = 0; i < aptList.size() ;i++){
                     aptList.get(i).getAptName();
 
-                    if(!aptName.contains(aptList.get(i).getAptName())){
-                        aptName.add(aptList.get(i).getAptName());
+                    if(!aptNameList.contains(aptList.get(i).getAptName())){
+                        aptNameList.add(aptList.get(i).getAptName());
                         aptDB.createTable(db,aptList.get(i).getAptName());
                     }
                     aptDB.insertData(db, aptList.get(i).getAptName(), aptList.get(i));
                 }
-
-
-
             }
         }).start();
     }

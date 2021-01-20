@@ -10,15 +10,19 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class AptDB extends SQLiteOpenHelper {
 
     final static String TableName = "aptTable";
+    Context mContext;
 
     private ArrayList<String> AptName;
 
     public AptDB(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
         AptName = new ArrayList<>();
+        mContext = context;
     }
 
 
@@ -58,6 +62,27 @@ public class AptDB extends SQLiteOpenHelper {
                 + "'" + aptList.getAptDateDay() + "');";
 
         db.execSQL(sql);
+    }
+
+    public ArrayList<String> getTableList(SQLiteDatabase db){
+
+        ArrayList<String> aptList = new ArrayList<>();
+        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+
+        if (cursor.moveToFirst()) {
+            while ( !cursor.isAfterLast() ) {
+
+                if(cursor.getString(0).equals("android_metadata") ||
+                        cursor.getString(0).equals("aptTable") ||
+                                cursor.getString(0).equals("sqlite_sequence")) {
+                }else {
+                    aptList.add(cursor.getString(0));
+                }
+                cursor.moveToNext();
+            }
+        }
+
+        return aptList;
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

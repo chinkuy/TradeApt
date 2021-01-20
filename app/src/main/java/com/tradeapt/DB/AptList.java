@@ -62,6 +62,12 @@ public class AptList{
             aptName = "래미안영통마크원1단지";
         }
 
+        if(aptName.equals("힐스테이트 영통")){
+            aptName = "힐스테이트영통";
+        }
+
+
+
         AptName = aptName;
     }
 
