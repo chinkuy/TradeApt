@@ -1,6 +1,6 @@
 package com.tradeapt.DB;
 
-public class AptList{
+public class Apt {
     private String AptName;
     private String AptPrice;
     private String AptExclusiveUse;
@@ -9,7 +9,7 @@ public class AptList{
     private String AptDateDay;
 
 
-    public AptList() {
+    public Apt() {
         AptName = new String();
         AptPrice = new String();
         AptExclusiveUse = new String();

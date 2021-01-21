@@ -9,8 +9,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-
-import static android.content.Context.MODE_PRIVATE;
+import java.util.HashMap;
 
 public class AptDB extends SQLiteOpenHelper {
 
@@ -50,7 +49,7 @@ public class AptDB extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
-    public void insertData(SQLiteDatabase db, String aptName, AptList aptList){
+    public void insertData(SQLiteDatabase db, String aptName, Apt aptList){
 
         String sql = "INSERT INTO " + aptName + " ("
                 + "AptPrice, AptExclusiveUse, AptFloor, AptDateMonth, AptDateDay)"
@@ -64,6 +63,8 @@ public class AptDB extends SQLiteOpenHelper {
         db.execSQL(sql);
     }
 
+
+
     public ArrayList<String> getTableList(SQLiteDatabase db){
 
         ArrayList<String> aptList = new ArrayList<>();
@@ -73,8 +74,8 @@ public class AptDB extends SQLiteOpenHelper {
             while ( !cursor.isAfterLast() ) {
 
                 if(cursor.getString(0).equals("android_metadata") ||
-                        cursor.getString(0).equals("aptTable") ||
-                                cursor.getString(0).equals("sqlite_sequence")) {
+                   cursor.getString(0).equals("aptTable") ||
+                   cursor.getString(0).equals("sqlite_sequence")) {
                 }else {
                     aptList.add(cursor.getString(0));
                 }
@@ -84,6 +85,35 @@ public class AptDB extends SQLiteOpenHelper {
 
         return aptList;
     }
+
+    public HashMap<String,ArrayList<Apt>> getAptInfo(SQLiteDatabase db, ArrayList<String> aptNameList){
+
+        HashMap<String,ArrayList<Apt>> aptMap = new HashMap<>();
+
+        for(int i = 0 ; i < aptNameList.size();i++) {
+
+            ArrayList<Apt> aptLists = new ArrayList<>();
+            Apt apt = new Apt();
+
+            String sql = "SELECT _id, AptPrice, AptExclusiveUse, AptFloor, AptDateMonth, AptDateDay FROM " + aptNameList.get(i);
+            Cursor cursor = db.rawQuery(sql, null);
+
+            while (cursor.moveToNext()) {
+                apt.setAptPrice(cursor.getString(1));
+                apt.setAptExclusiveUse(cursor.getString(2));
+                apt.setAptFloor(cursor.getString(3));
+                apt.setAptDateMonth(cursor.getString(4));
+                apt.setAptDateDay(cursor.getString(5));
+                aptLists.add(apt);
+            }
+
+            aptMap.put(aptNameList.get(i), aptLists);
+            cursor.close();
+        }
+
+        return aptMap;
+    }
+
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         String sql = "DROP TABLE if exists "+TableName;

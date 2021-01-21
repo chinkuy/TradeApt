@@ -16,18 +16,28 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    final String currentDate = "202101";
-    final String localNumber = "41117";
+    private final String currentDate = "202101";
+    private final String localNumber = "41117";
     private final String mDbName = "apt.db";
 
+
+    private boolean mIsTable;
+
+
+    private void initVariable(){
+
+        mIsTable = false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initVariable();
 
         final AptDB aptDB;
         final SQLiteDatabase db;
@@ -39,6 +49,14 @@ public class MainActivity extends AppCompatActivity {
         Log.d("Hey", "AptPreList : " + aptPreNameList);
 
         if(aptPreNameList.size() > 0){
+            mIsTable = true;
+        }else{
+            mIsTable = false;
+        }
+
+        if(mIsTable){
+            HashMap<String,ArrayList<Apt>> aptMap = aptDB.getAptInfo(db, aptPreNameList);
+            Log.d("Hey", "aptMap : " + aptMap);
 
         }else{
 
@@ -46,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         new Thread(new Runnable() {
 
-            ArrayList<AptList> aptList = new ArrayList<>();
+            ArrayList<Apt> aptList = new ArrayList<>();
             ArrayList<String> aptNameList = new ArrayList<>();
 
             public void run() {
@@ -65,9 +83,9 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    ArrayList<AptList> GetAptData(String localNumber, String date){
+    ArrayList<Apt> GetAptData(String localNumber, String date){
 
-        ArrayList<AptList> aptList = new ArrayList<>();
+        ArrayList<Apt> aptList = new ArrayList<>();
 
         String queryUrl="http://openapi.molit.go.kr:8081/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTrade"
                 +"?"+"serviceKey"+"="+PrivateInfo.mPrivateKey
@@ -86,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
             xpp.next();
             int eventType= xpp.getEventType();
-            AptList apt = new AptList();
+            Apt apt = new Apt();
 
             while( eventType != XmlPullParser.END_DOCUMENT ){
 
@@ -122,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                             xpp.next();
                             apt.setAptFloor(xpp.getText());
                             aptList.add(apt);
-                            apt = new AptList();
+                            apt = new Apt();
                         }
                         break;
 
