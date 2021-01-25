@@ -92,7 +92,7 @@ public class AptDB extends SQLiteOpenHelper {
 
         for(int i = 0 ; i < aptNameList.size();i++) {
 
-            ArrayList<Apt> aptLists = new ArrayList<>();
+            ArrayList<Apt> aptList = new ArrayList<>();
             Apt apt = new Apt();
 
             String sql = "SELECT _id, AptPrice, AptExclusiveUse, AptFloor, AptDateMonth, AptDateDay FROM " + aptNameList.get(i);
@@ -104,10 +104,10 @@ public class AptDB extends SQLiteOpenHelper {
                 apt.setAptFloor(cursor.getString(3));
                 apt.setAptDateMonth(cursor.getString(4));
                 apt.setAptDateDay(cursor.getString(5));
-                aptLists.add(apt);
+                aptList.add(apt);
             }
 
-            aptMap.put(aptNameList.get(i), aptLists);
+            aptMap.put(aptNameList.get(i), aptList);
             cursor.close();
         }
 

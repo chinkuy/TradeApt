@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -54,9 +55,12 @@ public class MainActivity extends AppCompatActivity {
             mIsTable = false;
         }
 
+        HashMap<String,ArrayList<Apt>> aptPreMap = new HashMap<>();
+        final HashMap<String,ArrayList<Apt>> aptCurMap = new HashMap<>();
+
         if(mIsTable){
-            HashMap<String,ArrayList<Apt>> aptMap = aptDB.getAptInfo(db, aptPreNameList);
-            Log.d("Hey", "aptMap : " + aptMap);
+            aptPreMap = aptDB.getAptInfo(db, aptPreNameList);
+            Log.d("Hey", "aptMap : " + aptPreMap);
 
         }else{
 
@@ -65,20 +69,32 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
 
             ArrayList<Apt> aptList = new ArrayList<>();
-            ArrayList<String> aptNameList = new ArrayList<>();
 
+            ArrayList<String> aptCurrentNameList = new ArrayList<>();
+            HashMap<String, ArrayList<Apt>> aptCurrentMap = new HashMap<>();
             public void run() {
                 aptList = GetAptData(localNumber, currentDate);
 
-                for(int i = 0; i < aptList.size() ;i++){
-                    aptList.get(i).getAptName();
+                //Collections.sort(aptList);
 
-                    if(!aptNameList.contains(aptList.get(i).getAptName())){
-                        aptNameList.add(aptList.get(i).getAptName());
+                for(int i = 0; i < aptList.size() ;i++){
+
+                    ArrayList<Apt> aptTempList = new ArrayList<>();
+                    Apt aptTemp = new Apt();
+
+                    if(!aptCurrentNameList.contains(aptList.get(i).getAptName())){
+                        aptCurrentNameList.add(aptList.get(i).getAptName());
                         aptDB.createTable(db,aptList.get(i).getAptName());
+                    }else{
+                        aptTempList = aptCurMap.get(aptList.get(i).getAptName());
                     }
+                    aptTemp = aptList.get(i);
+                    aptTempList.add(aptTemp);
+                    aptCurMap.put(aptList.get(i).getAptName(),aptTempList);
+
                     aptDB.insertData(db, aptList.get(i).getAptName(), aptList.get(i));
                 }
+                Log.d("Hey"," Hello");
             }
         }).start();
     }

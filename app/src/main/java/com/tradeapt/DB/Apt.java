@@ -1,6 +1,6 @@
 package com.tradeapt.DB;
 
-public class Apt {
+public class Apt implements Comparable<Apt>{
     private String AptName;
     private String AptPrice;
     private String AptExclusiveUse;
@@ -66,6 +66,28 @@ public class Apt {
             aptName = "힐스테이트영통";
         }
 
+        if(aptName.equals("광교 호반베르디움 트라엘")){
+            aptName = "광교호반베르디움트라엘";
+        }
+
+        if(aptName.equals("광교호수마을 참누리레이크")){
+            aptName = "광교호수마을참누리레이크";
+        }
+
+        if(aptName.equals("영통 라온프라이빗")){
+            aptName = "영통라온프라이빗";
+        }
+
+        if(aptName.equals("벽산(957-6)")){
+            aptName = "벽산구오칠";
+        }
+
+
+
+
+
+
+
 
 
         AptName = aptName;
@@ -89,6 +111,11 @@ public class Apt {
 
     public void setAptDateDay(String aptDateDay) {
         AptDateDay = aptDateDay;
+    }
+
+    @Override
+    public int compareTo(Apt apt) {
+        return this.AptName.compareTo(apt.getAptName());
     }
 }
 
