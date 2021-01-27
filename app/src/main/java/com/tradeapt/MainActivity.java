@@ -5,33 +5,44 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Xml;
 
 import com.tradeapt.Key.PrivateInfo;
 import com.tradeapt.DB.*;
+import com.tradeapt.Type.AptType;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 public class MainActivity extends AppCompatActivity {
 
     private final String currentDate = "202101";
     private final String localNumber = "41117";
-    private final String mDbName = "apt.db";
 
+    private void initVariable() {
 
-    private boolean mIsTable;
-
-
-    private void initVariable(){
-
-        mIsTable = false;
     }
 
     @Override
@@ -40,64 +51,89 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initVariable();
 
-        final AptDB aptDB;
-        final SQLiteDatabase db;
-        aptDB = new AptDB(MainActivity.this, mDbName, null, 1);
-        db = aptDB.getWritableDatabase();
-        aptDB.onCreate(db);
+        Apt apt = new Apt();
 
-        ArrayList<String> aptPreNameList = aptDB.getTableList(db);
-        Log.d("Hey", "AptPreList : " + aptPreNameList);
+        apt.setAptName("One");
+        apt.setAptPrice("10000");
 
-        if(aptPreNameList.size() > 0){
-            mIsTable = true;
-        }else{
-            mIsTable = false;
-        }
+        ArrayList<Apt> aptList = new ArrayList<>();
 
-        HashMap<String,ArrayList<Apt>> aptPreMap = new HashMap<>();
-        final HashMap<String,ArrayList<Apt>> aptCurMap = new HashMap<>();
+        aptList.add(apt);
+        aptList.add(apt);
+        aptList.add(apt);
+        aptList.add(apt);
 
-        if(mIsTable){
-            aptPreMap = aptDB.getAptInfo(db, aptPreNameList);
-            Log.d("Hey", "aptMap : " + aptPreMap);
-
-        }else{
-
-        }
-
+        writeXml(aptList);
         new Thread(new Runnable() {
 
-            ArrayList<Apt> aptList = new ArrayList<>();
 
-            ArrayList<String> aptCurrentNameList = new ArrayList<>();
-            HashMap<String, ArrayList<Apt>> aptCurrentMap = new HashMap<>();
             public void run() {
-                aptList = GetAptData(localNumber, currentDate);
-
-                //Collections.sort(aptList);
-
-                for(int i = 0; i < aptList.size() ;i++){
-
-                    ArrayList<Apt> aptTempList = new ArrayList<>();
-                    Apt aptTemp = new Apt();
-
-                    if(!aptCurrentNameList.contains(aptList.get(i).getAptName())){
-                        aptCurrentNameList.add(aptList.get(i).getAptName());
-                        aptDB.createTable(db,aptList.get(i).getAptName());
-                    }else{
-                        aptTempList = aptCurMap.get(aptList.get(i).getAptName());
-                    }
-                    aptTemp = aptList.get(i);
-                    aptTempList.add(aptTemp);
-                    aptCurMap.put(aptList.get(i).getAptName(),aptTempList);
-
-                    aptDB.insertData(db, aptList.get(i).getAptName(), aptList.get(i));
-                }
-                Log.d("Hey"," Hello");
+                //   aptList = GetAptData(localNumber, currentDate);
             }
         }).start();
+
     }
+
+
+    private void writeXml(ArrayList<Apt> aptList) {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+            Document doc = docBuilder.newDocument();
+            doc.setXmlStandalone(true);
+
+            Element apt = doc.createElement("Apt");
+            doc.appendChild(apt);
+
+            for(int i = 0 ; i < aptList.size(); i++) {
+
+                Element item = doc.createElement("item");
+                apt.appendChild(item);
+                item.setAttribute("item", null);
+
+                Element name = doc.createElement(AptType.APT_NAME);
+                name.appendChild(doc.createTextNode(aptList.get(i).getAptName()));
+                item.appendChild(name);
+
+                Element price = doc.createElement(AptType.APT_PRICE);
+                price.appendChild(doc.createTextNode(aptList.get(i).getAptPrice()));
+                item.appendChild(price);
+
+                Element exclusive = doc.createElement(AptType.APT_EXCLUSIVE_USE );
+                price.appendChild(doc.createTextNode(aptList.get(i).getAptExclusiveUse()));
+                item.appendChild(exclusive);
+
+                Element floor = doc.createElement(AptType.APT_FLOOR );
+                price.appendChild(doc.createTextNode(aptList.get(i).getAptFloor()));
+                item.appendChild(floor);
+
+                Element month = doc.createElement(AptType.APT_DATE_MONTH );
+                price.appendChild(doc.createTextNode(aptList.get(i).getAptDateMonth()));
+                item.appendChild(month);
+
+                Element day = doc.createElement(AptType.APT_DATE_DAY );
+                price.appendChild(doc.createTextNode(aptList.get(i).getAptDateDay()));
+                item.appendChild(day);
+            }
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4"); //정렬 스페이스4칸
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //들여쓰기
+            transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "yes"); //doc.setXmlStandalone(true); 했을때 붙어서 출력되는부분 개행
+
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new FileOutputStream(new File("D://tmp/book.xml")));
+
+            transformer.transform(source, result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     ArrayList<Apt> GetAptData(String localNumber, String date){
 
