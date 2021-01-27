@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "yes"); //doc.setXmlStandalone(true); 했을때 붙어서 출력되는부분 개행
 
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new FileOutputStream(new File("D://tmp/book.xml")));
+            StreamResult result = new StreamResult(new FileOutputStream(new File("D://source.xml")));
 
             transformer.transform(source, result);
 
